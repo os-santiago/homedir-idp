@@ -420,3 +420,5 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 ---
 
 **Built with ❤️ by OpenSource Santiago**
+
+🚀 **Status:** Ready for deployment

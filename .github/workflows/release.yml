@@ -1,0 +1,232 @@
+name: Production Release & Deploy
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      skip_deploy:
+        description: 'Skip deployment (build only)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: production-release-idp
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build & Deploy IDP
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release]') }}
+    permissions:
+      contents: write
+      packages: write
+    env:
+      # VPS Deployment Configuration
+      DEPLOY_HOST: ${{ vars.DEPLOY_SSH_HOST || '72.60.141.165' }}
+      DEPLOY_USER: ${{ vars.DEPLOY_SSH_USER || 'root' }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+      HEALTHCHECK_URL: ${{ vars.IDP_HEALTHCHECK_URL || 'https://homedir-idp.opensourcesantiago.io/q/health' }}
+      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Calculate version
+        id: version
+        run: |
+          set -euo pipefail
+          # Use commit SHA as version for now (simple approach)
+          VERSION="0.1.0-${GITHUB_SHA::8}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "📦 Version: ${VERSION}"
+
+      - name: Build with Maven
+        working-directory: quarkus-app
+        run: |
+          ./mvnw clean package -B \
+            -Drevision=${{ steps.version.outputs.version }} \
+            -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push container image
+        id: build_image
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Normalize image name (lowercase)
+          IMAGE_NAME_LOWER=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_TAG="${REGISTRY}/${IMAGE_NAME_LOWER}:${VERSION}"
+          IMAGE_LATEST="${REGISTRY}/${IMAGE_NAME_LOWER}:latest"
+
+          echo "Building container image..."
+          echo "Image: ${IMAGE_TAG}"
+
+          # Build Dockerfile
+          cat > Dockerfile <<'EOF'
+FROM registry.access.redhat.com/ubi8/openjdk-21:1.20
+
+ENV LANGUAGE='en_US:en'
+
+# Copy application
+COPY --chown=185 quarkus-app/target/quarkus-app/lib/ /deployments/lib/
+COPY --chown=185 quarkus-app/target/quarkus-app/*.jar /deployments/
+COPY --chown=185 quarkus-app/target/quarkus-app/app/ /deployments/app/
+COPY --chown=185 quarkus-app/target/quarkus-app/quarkus/ /deployments/quarkus/
+
+EXPOSE 8090
+USER 185
+ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+
+ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
+EOF
+
+          # Build image
+          docker build -t "${IMAGE_TAG}" -t "${IMAGE_LATEST}" .
+
+          # Push to registry
+          docker push "${IMAGE_TAG}"
+          docker push "${IMAGE_LATEST}"
+
+          echo "image=${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "✅ Image pushed: ${IMAGE_TAG}"
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.skip_deploy }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## Homedir IDP Release ${{ steps.version.outputs.version }}
+
+            **Commit:** ${{ github.sha }}
+            **Image:** ${{ steps.build_image.outputs.image }}
+
+            ### Changes
+            See commit history for details.
+
+            ### Deployment
+            Automatically deployed to: https://homedir-idp.opensourcesantiago.io
+          draft: false
+          prerelease: false
+
+      - name: Deploy to VPS
+        if: ${{ !inputs.skip_deploy }}
+        env:
+          IMAGE: ${{ steps.build_image.outputs.image }}
+        run: |
+          set -euo pipefail
+
+          echo "🚀 Deploying to VPS..."
+
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if [ -n "${DEPLOY_SSH_KNOWN_HOSTS:-}" ]; then
+            echo "$DEPLOY_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+
+          # Deploy via SSH
+          ssh -i ~/.ssh/deploy_key \
+              -p "${DEPLOY_PORT}" \
+              -o StrictHostKeyChecking=accept-new \
+              "${DEPLOY_USER}@${DEPLOY_HOST}" \
+              bash -s <<EOF
+          set -euo pipefail
+
+          echo "📥 Pulling new image..."
+          podman pull "${IMAGE}"
+
+          echo "🛑 Stopping existing container..."
+          podman stop homedir-idp || true
+          podman rm homedir-idp || true
+
+          echo "🚀 Starting new container..."
+          podman run -d \\
+            --name homedir-idp \\
+            --restart unless-stopped \\
+            -p 8090:8090 \\
+            -v /opt/homedir-idp/data:/work/data:Z \\
+            -e QUARKUS_HTTP_HOST=0.0.0.0 \\
+            -e QUARKUS_HTTP_PORT=8090 \\
+            --label "io.containers.autoupdate=registry" \\
+            "${IMAGE}"
+
+          echo "⏳ Waiting for container to start..."
+          sleep 10
+
+          echo "🏥 Health check..."
+          podman exec homedir-idp curl -f http://localhost:8090/q/health || {
+            echo "❌ Health check failed!"
+            podman logs homedir-idp --tail 50
+            exit 1
+          }
+
+          echo "✅ Deployment successful!"
+          podman ps | grep homedir-idp
+EOF
+
+      - name: External health check
+        if: ${{ !inputs.skip_deploy }}
+        run: |
+          echo "🏥 External health check..."
+          for i in {1..30}; do
+            if curl -f -s "${HEALTHCHECK_URL}" > /dev/null; then
+              echo "✅ Health check passed!"
+              curl -s "${HEALTHCHECK_URL}" | jq .
+              exit 0
+            fi
+            echo "Attempt $i/30 failed, retrying in 10s..."
+            sleep 10
+          done
+          echo "❌ Health check failed after 30 attempts"
+          exit 1
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "### 🚀 Deployment Summary"
+            echo ""
+            echo "**Version:** ${{ steps.version.outputs.version }}"
+            echo "**Image:** ${{ steps.build_image.outputs.image }}"
+            echo "**URL:** https://homedir-idp.opensourcesantiago.io"
+            echo "**Health:** ${HEALTHCHECK_URL}"
+            echo ""
+            if [ "${{ job.status }}" = "success" ]; then
+              echo "**Status:** ✅ Deployment successful"
+            else
+              echo "**Status:** ❌ Deployment failed"
+            fi
+          } >> $GITHUB_STEP_SUMMARY

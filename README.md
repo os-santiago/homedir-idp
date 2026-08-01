@@ -4,6 +4,7 @@
 
 ![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge&logo=apache&logoColor=white)
 [![Project Status: Active](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge&logo=github&logoColor=white)](https://github.com/os-santiago/homedir-idp)
+[![Production](https://img.shields.io/badge/prod-homedir--idp.opensourcesantiago.io-10b981?style=for-the-badge&logo=quarkus&logoColor=white)](https://homedir-idp.opensourcesantiago.io)
 
 Self-service portal for creating, deploying, and managing Homedir community instances. Empowers communities to spin up their own Homedir deployments with golden path templates and automated provisioning.
 
@@ -15,6 +16,9 @@ Enable any tech community to deploy their own Homedir instance in **under 5 minu
 
 ### Phase 1: MVP (Weeks 1-2)
 - [x] Repository structure
+- [x] Quarkus project setup
+- [x] Dark theme UI mockup
+- [x] CI/CD pipeline (PR validation + auto-deploy)
 - [ ] Template catalog (JSON-based)
 - [ ] Self-service wizard UI (Qute templates)
 - [ ] Scaffolder service (Java/Quarkus)
@@ -350,6 +354,49 @@ Track:
 - Deployment success rate
 - Average time from request to live instance
 - Resource usage per instance
+
+## 🚀 CI/CD & Deployment
+
+### Production Environment
+
+**URL:** https://homedir-idp.opensourcesantiago.io  
+**VPS:** 72.60.141.165  
+**Container:** Podman on port 8090  
+**Reverse Proxy:** Nginx with Let's Encrypt SSL
+
+### Automated Deployment Pipeline
+
+```
+PR → Validation → Merge to master → Build → Container Image → Deploy to VPS → Health Check
+```
+
+**Workflows:**
+
+1. **PR Validation** (`.github/workflows/pr-check.yml`)
+   - Build & test Quarkus app
+   - Code quality checks
+   - Triggers: Pull requests to master
+
+2. **Production Release** (`.github/workflows/release.yml`)
+   - Build Maven package
+   - Create container image (UBI8 + OpenJDK 21)
+   - Push to GitHub Container Registry
+   - Deploy to VPS via SSH
+   - Health check verification
+   - Create GitHub release
+   - Triggers: Push to master branch
+
+**Container Image:** `ghcr.io/os-santiago/homedir-idp:latest`
+
+### VPS Setup
+
+Run on VPS to prepare for deployments:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/os-santiago/homedir-idp/master/scripts/setup-vps.sh | bash
+```
+
+See [docs/deployment.md](docs/deployment.md) for detailed deployment guide.
 
 ## 🤝 Contributing
 

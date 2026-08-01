@@ -1,0 +1,253 @@
+{#include layout/main activePage="home"}
+
+{#title}Homedir IDP - Internal Developer Platform{/title}
+
+{#content}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1 class="hero-title">Build Your Community Platform in Minutes</h1>
+        <p class="hero-subtitle">
+            Self-service portal for deploying Homedir instances with golden path templates.
+            Zero infrastructure knowledge required.
+        </p>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <a href="/templates" class="btn btn-golden">
+                <span>⚡</span>
+                Browse Templates
+            </a>
+            <a href="/docs" class="btn btn-secondary">
+                <span>📖</span>
+                View Documentation
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-xl">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Templates Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">< 5min</div>
+                <div class="stat-label">Deployment Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Automated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Instances Created</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-xl">
+    <div class="container">
+        <h2 class="text-center" style="margin-bottom: 3rem;">How It Works</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div class="card">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">1️⃣</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Choose Template</h3>
+                <p style="color: var(--color-text-muted); margin: 0;">
+                    Browse our golden path templates and select the one that fits your community needs.
+                </p>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">2️⃣</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Configure</h3>
+                <p style="color: var(--color-text-muted); margin: 0;">
+                    Fill in your community name, subdomain, and feature preferences through our wizard.
+                </p>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">3️⃣</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Deploy</h3>
+                <p style="color: var(--color-text-muted); margin: 0;">
+                    Click "Create" and watch as your instance is automatically scaffolded and deployed.
+                </p>
+            </div>
+
+            <div class="card">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">✅</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Go Live</h3>
+                <p style="color: var(--color-text-muted); margin: 0;">
+                    Your Homedir instance is ready at your custom subdomain. Start building your community!
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Templates -->
+<section class="py-xl" style="background: var(--color-bg-secondary); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2>Golden Path Templates</h2>
+            <a href="/templates" class="btn btn-secondary">View All</a>
+        </div>
+
+        <div class="template-grid">
+            <!-- Homedir Community Edition - Golden Path -->
+            <div class="template-card card-golden-path">
+                <span class="golden-path-badge">
+                    <span>⭐</span> Golden Path
+                </span>
+
+                <div class="template-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white; margin-top: 1rem;">
+                    🏛️
+                </div>
+
+                <h3 class="template-name">Homedir Community Edition</h3>
+                <p class="template-description">
+                    Full-featured community platform with events, CFP workflow, projects, and integrations.
+                    Perfect for tech communities and conferences.
+                </p>
+
+                <div class="template-features">
+                    <span class="feature-tag">Events</span>
+                    <span class="feature-tag">CFP</span>
+                    <span class="feature-tag">Projects</span>
+                    <span class="feature-tag">OAuth</span>
+                </div>
+
+                <a href="/templates/homedir-community" class="btn btn-golden" style="width: 100%;">
+                    Create Instance
+                </a>
+            </div>
+
+            <!-- Homedir Minimal -->
+            <div class="template-card">
+                <div class="template-icon">
+                    ⚡
+                </div>
+
+                <h3 class="template-name">Homedir Minimal</h3>
+                <p class="template-description">
+                    Lightweight version with core features only. Quick to deploy, minimal resource usage.
+                    Great for small communities.
+                </p>
+
+                <div class="template-features">
+                    <span class="feature-tag">Events</span>
+                    <span class="feature-tag">Basic Auth</span>
+                </div>
+
+                <a href="/templates/homedir-minimal" class="btn btn-secondary" style="width: 100%;">
+                    Coming Soon
+                </a>
+            </div>
+
+            <!-- Homedir Enterprise -->
+            <div class="template-card">
+                <div class="template-icon">
+                    🏢
+                </div>
+
+                <h3 class="template-name">Homedir Enterprise</h3>
+                <p class="template-description">
+                    Enterprise-ready with advanced security, SSO, analytics, and custom branding.
+                    For large organizations.
+                </p>
+
+                <div class="template-features">
+                    <span class="feature-tag">All Features</span>
+                    <span class="feature-tag">SSO</span>
+                    <span class="feature-tag">Analytics</span>
+                    <span class="feature-tag">Branding</span>
+                </div>
+
+                <a href="/templates/homedir-enterprise" class="btn btn-secondary" style="width: 100%;">
+                    Coming Soon
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why IDP -->
+<section class="py-xl">
+    <div class="container">
+        <h2 class="text-center" style="margin-bottom: 3rem;">Why Use Homedir IDP?</h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">⚡ Lightning Fast</h3>
+                <p style="color: var(--color-text-muted);">
+                    From zero to deployed instance in under 5 minutes. Automated scaffolding, GitHub integration, and VPS deployment.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">🎯 Best Practices</h3>
+                <p style="color: var(--color-text-muted);">
+                    Golden path templates follow community best practices. No configuration fatigue, just proven patterns.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">🔒 Secure by Default</h3>
+                <p style="color: var(--color-text-muted);">
+                    Built-in security: OAuth, input validation, secrets management. Sleep well knowing your platform is secure.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">🚀 Self-Service</h3>
+                <p style="color: var(--color-text-muted);">
+                    Empower your team to deploy without DevOps knowledge. Focus on building community, not infrastructure.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">📊 Transparent</h3>
+                <p style="color: var(--color-text-muted);">
+                    Real-time deployment status, detailed logs, health checks. Know exactly what's happening at every step.
+                </p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--color-accent-primary); margin-bottom: 0.5rem;">🔄 Always Updated</h3>
+                <p style="color: var(--color-text-muted);">
+                    Automatic version upgrades available. One-click updates to latest Homedir features and security patches.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-xl" style="background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-primary)); border-top: 1px solid var(--color-border);">
+    <div class="container text-center">
+        <h2 style="margin-bottom: 1rem;">Ready to Deploy Your Community Platform?</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Choose a golden path template, configure in minutes, and launch your Homedir instance today.
+        </p>
+
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="/templates" class="btn btn-golden">
+                <span>⚡</span>
+                Get Started
+            </a>
+            <a href="https://github.com/os-santiago/homedir-idp" class="btn btn-secondary" target="_blank">
+                <span>📚</span>
+                View on GitHub
+            </a>
+        </div>
+    </div>
+</section>
+
+{/content}
+
+{/include}

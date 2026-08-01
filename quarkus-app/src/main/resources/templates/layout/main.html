@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{#insert title}Homedir IDP{/insert}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/idp.css">
+
+    {#insert head}{/insert}
+</head>
+<body class="idp-container">
+    <!-- Header -->
+    <header class="idp-header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <div class="logo-icon">H</div>
+                    <span>Homedir IDP</span>
+                </a>
+
+                <nav class="nav">
+                    <a href="/templates" class="nav-link {#if activePage == 'templates'}active{/if}">Templates</a>
+                    <a href="/projects" class="nav-link {#if activePage == 'projects'}active{/if}">My Projects</a>
+                    <a href="/docs" class="nav-link {#if activePage == 'docs'}active{/if}">Docs</a>
+                    <a href="/admin" class="nav-link {#if activePage == 'admin'}active{/if}">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {#insert content}
+        <div class="container">
+            <p style="padding: 2rem; text-align: center; color: var(--color-text-muted);">
+                Content goes here
+            </p>
+        </div>
+        {/insert}
+    </main>
+
+    <!-- Footer -->
+    <footer class="idp-footer">
+        <div class="container">
+            <p>&copy; 2026 OpenSource Santiago &middot; Homedir IDP v0.1.0</p>
+            <p style="font-size: var(--text-sm); margin-top: var(--space-sm);">
+                <a href="https://github.com/os-santiago/homedir-idp">GitHub</a> &middot;
+                <a href="/docs">Documentation</a> &middot;
+                <a href="https://discord.gg/3eawzc9ybc">Discord</a>
+            </p>
+        </div>
+    </footer>
+
+    {#insert scripts}{/insert}
+</body>
+</html>

@@ -88,24 +88,24 @@ jobs:
           echo "Image: ${IMAGE_TAG}"
 
           # Build Dockerfile
-          cat > Dockerfile <<'EOF'
-FROM registry.access.redhat.com/ubi8/openjdk-21:1.20
+          cat > Dockerfile <<'DOCKERFILE_END'
+          FROM registry.access.redhat.com/ubi8/openjdk-21:1.20
 
-ENV LANGUAGE='en_US:en'
+          ENV LANGUAGE='en_US:en'
 
-# Copy application
-COPY --chown=185 quarkus-app/target/quarkus-app/lib/ /deployments/lib/
-COPY --chown=185 quarkus-app/target/quarkus-app/*.jar /deployments/
-COPY --chown=185 quarkus-app/target/quarkus-app/app/ /deployments/app/
-COPY --chown=185 quarkus-app/target/quarkus-app/quarkus/ /deployments/quarkus/
+          # Copy application
+          COPY --chown=185 quarkus-app/target/quarkus-app/lib/ /deployments/lib/
+          COPY --chown=185 quarkus-app/target/quarkus-app/*.jar /deployments/
+          COPY --chown=185 quarkus-app/target/quarkus-app/app/ /deployments/app/
+          COPY --chown=185 quarkus-app/target/quarkus-app/quarkus/ /deployments/quarkus/
 
-EXPOSE 8090
-USER 185
-ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
-ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+          EXPOSE 8090
+          USER 185
+          ENV JAVA_OPTS_APPEND="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+          ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
 
-ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
-EOF
+          ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]
+          DOCKERFILE_END
 
           # Build image
           docker build -t "${IMAGE_TAG}" -t "${IMAGE_LATEST}" .
@@ -162,26 +162,26 @@ EOF
               -p "${DEPLOY_PORT}" \
               -o StrictHostKeyChecking=accept-new \
               "${DEPLOY_USER}@${DEPLOY_HOST}" \
-              bash -s <<EOF
+              bash -s <<'DEPLOY_SCRIPT_END'
           set -euo pipefail
 
           echo "📥 Pulling new image..."
-          podman pull "${IMAGE}"
+          podman pull "$1"
 
           echo "🛑 Stopping existing container..."
           podman stop homedir-idp || true
           podman rm homedir-idp || true
 
           echo "🚀 Starting new container..."
-          podman run -d \\
-            --name homedir-idp \\
-            --restart unless-stopped \\
-            -p 8090:8090 \\
-            -v /opt/homedir-idp/data:/work/data:Z \\
-            -e QUARKUS_HTTP_HOST=0.0.0.0 \\
-            -e QUARKUS_HTTP_PORT=8090 \\
-            --label "io.containers.autoupdate=registry" \\
-            "${IMAGE}"
+          podman run -d \
+            --name homedir-idp \
+            --restart unless-stopped \
+            -p 8090:8090 \
+            -v /opt/homedir-idp/data:/work/data:Z \
+            -e QUARKUS_HTTP_HOST=0.0.0.0 \
+            -e QUARKUS_HTTP_PORT=8090 \
+            --label "io.containers.autoupdate=registry" \
+            "$1"
 
           echo "⏳ Waiting for container to start..."
           sleep 10
@@ -195,7 +195,7 @@ EOF
 
           echo "✅ Deployment successful!"
           podman ps | grep homedir-idp
-EOF
+          DEPLOY_SCRIPT_END "${IMAGE}"
 
       - name: External health check
         if: ${{ !inputs.skip_deploy }}

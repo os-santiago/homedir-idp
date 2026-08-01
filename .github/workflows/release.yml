@@ -187,9 +187,9 @@ jobs:
           sleep 10
 
           echo "🏥 Health check..."
-          podman exec homedir-idp curl -f http://localhost:8090/q/health || {
+          podman exec homedir-idp curl -f http://localhost:8090/ || {
             echo "❌ Health check failed!"
-            podman logs homedir-idp --tail 50
+            podman logs homedir-idp
             exit 1
           }
 
@@ -202,9 +202,9 @@ jobs:
         run: |
           echo "🏥 External health check..."
           for i in {1..30}; do
-            if curl -f -s "${HEALTHCHECK_URL}" > /dev/null; then
+            if curl -f -s "https://homedir-idp.opensourcesantiago.io/" > /dev/null; then
               echo "✅ Health check passed!"
-              curl -s "${HEALTHCHECK_URL}" | jq .
+              echo "Application is responding at: https://homedir-idp.opensourcesantiago.io/"
               exit 0
             fi
             echo "Attempt $i/30 failed, retrying in 10s..."

@@ -162,7 +162,7 @@ jobs:
               -p "${DEPLOY_PORT}" \
               -o StrictHostKeyChecking=accept-new \
               "${DEPLOY_USER}@${DEPLOY_HOST}" \
-              bash -s <<'DEPLOY_SCRIPT_END'
+              "bash -s ${IMAGE}" <<'DEPLOY_SCRIPT_END'
           set -euo pipefail
 
           echo "📥 Pulling new image..."
@@ -195,7 +195,7 @@ jobs:
 
           echo "✅ Deployment successful!"
           podman ps | grep homedir-idp
-          DEPLOY_SCRIPT_END "${IMAGE}"
+          DEPLOY_SCRIPT_END
 
       - name: External health check
         if: ${{ !inputs.skip_deploy }}

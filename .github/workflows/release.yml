@@ -178,8 +178,10 @@ jobs:
             --restart unless-stopped \
             -p 8090:8090 \
             -v /opt/homedir-idp/data:/work/data:Z \
+            -v /etc/homedir-idp-secrets:/etc/homedir-idp-secrets:ro,Z \
             -e QUARKUS_HTTP_HOST=0.0.0.0 \
             -e QUARKUS_HTTP_PORT=8090 \
+            -e IDP_GITHUB_TOKEN=$(cat /etc/homedir-idp-secrets/github-token) \
             --label "io.containers.autoupdate=registry" \
             "$1"
 

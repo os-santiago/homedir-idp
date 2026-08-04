@@ -77,6 +77,18 @@
             <version>0.39.0</version>
         </dependency>
 
+        <!-- Encryption for GitHub Secrets -->
+        <dependency>
+            <groupId>com.goterl</groupId>
+            <artifactId>lazysodium-java</artifactId>
+            <version>5.1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.14.0</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>io.quarkus</groupId>

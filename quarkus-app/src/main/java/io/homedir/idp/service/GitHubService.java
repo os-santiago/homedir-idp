@@ -102,10 +102,7 @@ public class GitHubService {
 
             String encryptedValue = encryptSecret(secretValue, keyValue);
 
-            repo.createSecret(secretName)
-                .withKeyId(keyId)
-                .withEncryptedValue(encryptedValue)
-                .create();
+            repo.createSecret(secretName, encryptedValue, keyId);
 
             log.debug("Created secret: " + secretName);
         }
@@ -117,7 +114,7 @@ public class GitHubService {
 
         byte[] ciphertext = new byte[Box.SEALBYTES + plaintextBytes.length];
 
-        boolean success = sodium.cryptoBoxSealEasy(ciphertext, plaintextBytes, plaintextBytes.length, publicKeyBytes);
+        boolean success = sodium.cryptoBoxSeal(ciphertext, plaintextBytes, plaintextBytes.length, publicKeyBytes);
 
         if (!success) {
             throw new RuntimeException("Failed to encrypt secret with libsodium");
